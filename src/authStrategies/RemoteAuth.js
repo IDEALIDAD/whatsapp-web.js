@@ -138,21 +138,18 @@ class RemoteAuth extends BaseAuthStrategy {
         if (sessionExists) await this.store.delete({session: this.sessionName});
     }
 
-    async compressSession() {
-        const archive = archiver('zip');
-        const stream = fs.createWriteStream(`${this.sessionName}.zip`);
-
-        await fs.copy(this.userDataDir, this.tempDir).catch(() => {});
-        await this.deleteMetadata();
-        return new Promise((resolve, reject) => {
-            archive
-                .directory(this.tempDir, false)
-                .on('error', err => reject(err))
-                .pipe(stream);
-
-            stream.on('close', () => resolve());
-            archive.finalize();
+    async unCompressSession(compressedSessionPath) {
+        await new Promise((resolve, reject) => {
+            const zip = new AdmZip(compressedSessionPath);
+            zip.extractAllToAsync(this.userDataDir, true, false, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
         });
+        await fs.promises.unlink(compressedSessionPath);
     }
 
     async compressSession() {
