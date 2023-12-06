@@ -63,8 +63,8 @@ For more information on saving and restoring sessions, check out the available [
 | Receive media (images/audio/video/documents)  | ✅  |
 | Send contact cards | ✅ |
 | Send location | ✅ |
-| Send buttons | ❌ |
-| Send lists | ❌  [(DEPRECATED)](https://www.youtube.com/watch?v=hv1R1rLeVVE) |
+| Send buttons | ✅ |
+| Send lists | ✅ (business accounts not supported) |
 | Receive location | ✅ | 
 | Message replies | ✅ |
 | Join groups by invite  | ✅ |
@@ -81,8 +81,6 @@ For more information on saving and restoring sessions, check out the available [
 | Get profile pictures | ✅ |
 | Set user status message | ✅ |
 | React to messages | ✅ |
-| Vote in polls | 🔜 |
-| Create polls | ✅ |
 
 Something missing? Make an issue and let us know!
 
