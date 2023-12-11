@@ -105,7 +105,7 @@ class Client extends EventEmitter {
                 browserArgs.push(`--user-agent=${this.options.userAgent}`);
             }
 
-            browser = await puppeteer.launch({...puppeteerOpts, args: browserArgs});
+            browser = await puppeteer.launch({...puppeteerOpts, headless: "new", args: browserArgs});
             page = (await browser.pages())[0];
         }
 

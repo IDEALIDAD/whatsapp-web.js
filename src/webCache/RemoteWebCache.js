@@ -1,5 +1,4 @@
-const fetch = require('node-fetch');
-const { WebCache, VersionResolveError } = require('./WebCache');
+const { WebCache, VersionResolveError } = require("./WebCache");
 
 /**
  * RemoteWebCache - Fetches a WhatsApp Web version index from a remote server
@@ -11,13 +10,17 @@ class RemoteWebCache extends WebCache {
     constructor(options = {}) {
         super();
 
-        if (!options.remotePath) throw new Error('webVersionCache.remotePath is required when using the remote cache');
+        if (!options.remotePath)
+            throw new Error(
+                "webVersionCache.remotePath is required when using the remote cache"
+            );
         this.remotePath = options.remotePath;
         this.strict = options.strict || false;
     }
 
     async resolve(version) {
-        const remotePath = this.remotePath.replace('{version}', version);
+        const fetch = (await import("./fetchWrapper.mjs")).default;
+        const remotePath = this.remotePath.replace("{version}", version);
 
         try {
             const cachedRes = await fetch(remotePath);
@@ -28,8 +31,11 @@ class RemoteWebCache extends WebCache {
             console.error(`Error fetching version ${version} from remote`, err);
         }
 
-        if (this.strict) throw new VersionResolveError(`Couldn't load version ${version} from the archive`);
-        return null;         
+        if (this.strict)
+            throw new VersionResolveError(
+                `Couldn't load version ${version} from the archive`
+            );
+        return null;
     }
 
     async persist() {

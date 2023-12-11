@@ -1,9 +1,14 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
-const mime = require('mime');
-const fetch = require('node-fetch');
+let mime;
+(async () => {
+    mime = (await import('./mimeWrapper.mjs')).default;
+})();
+let fetch;
+(async () => {
+    fetch = (await import('./fetchWrapper.mjs')).default;
+})();
 const { URL } = require('url');
 
 /**
@@ -45,9 +50,10 @@ class MessageMedia {
      * @param {string} filePath 
      * @returns {MessageMedia}
      */
-    static fromFilePath(filePath) {
+    static async fromFilePath(filePath) {
+        const mime = (await import('./mimeWrapper.mjs')).default;
         const b64data = fs.readFileSync(filePath, {encoding: 'base64'});
-        const mimetype = mime.getType(filePath); 
+        const mimetype = mime.getType(filePath);
         const filename = path.basename(filePath);
 
         return new MessageMedia(mimetype, b64data, filename);
@@ -65,21 +71,25 @@ class MessageMedia {
      * @returns {Promise<MessageMedia>}
      */
     static async fromUrl(url, options = {}) {
+        // Importar dinámicamente mime y fetch
+        const mime = (await import('./mimeWrapper.mjs')).default;
+        const fetch = (await import('./fetchWrapper.mjs')).default;
+    
         const pUrl = new URL(url);
         let mimetype = mime.getType(pUrl.pathname);
-
+    
         if (!mimetype && !options.unsafeMime)
             throw new Error('Unable to determine MIME type using URL. Set unsafeMime to true to download it anyway.');
-
-        async function fetchData (url, options) {
+    
+        async function fetchData(url, options) {
             const reqOptions = Object.assign({ headers: { accept: 'image/* video/* text/* audio/*' } }, options);
             const response = await fetch(url, reqOptions);
             const mime = response.headers.get('Content-Type');
             const size = response.headers.get('Content-Length');
-
+    
             const contentDisposition = response.headers.get('Content-Disposition');
             const name = contentDisposition ? contentDisposition.match(/((?<=filename=")(.*)(?="))/) : null;
-
+    
             let data = '';
             if (response.buffer) {
                 data = (await response.buffer()).toString('base64');
@@ -93,17 +103,17 @@ class MessageMedia {
             
             return { data, mime, name, size };
         }
-
+    
         const res = options.client
             ? (await options.client.pupPage.evaluate(fetchData, url, options.reqOptions))
             : (await fetchData(url, options.reqOptions));
-
+    
         const filename = options.filename ||
             (res.name ? res.name[0] : (pUrl.pathname.split('/').pop() || 'file'));
         
         if (!mimetype)
             mimetype = res.mime;
-
+    
         return new MessageMedia(mimetype, res.data, filename, res.size || null);
     }
 }
