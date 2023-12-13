@@ -23,6 +23,10 @@ client.on('qr', () => {
     console.log('Please scan the QR code on the browser.');
 });
 
+client.on('message', (message)=>{
+console.log(message)
+})
+
 client.on('authenticated', (session) => {
     console.log(JSON.stringify(session));
 });
